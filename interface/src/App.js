@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Footer, Possibility, Features, WhatGPT3, Header } from './containers';
-import { CTA, Brand, Navbar } from './components';
+import { Footer, Possibility, Header } from './containers';
+import {  Navbar } from './components';
 import { ConnectProvider } from './context/ConnectContext';
 
 import './App.css';
@@ -11,13 +11,11 @@ const App = () => (
     <ConnectProvider>
       <Navbar />
       <Header />
+     
     
-    <Brand />
-    <WhatGPT3 />
-    <Features />
     <Possibility />
-    <CTA />
     <Footer />
+    
     </ConnectProvider>
   </div>
 );

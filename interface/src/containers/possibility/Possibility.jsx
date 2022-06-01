@@ -10,6 +10,19 @@ import { ConnectContext } from "../../context/ConnectContext";
 import boonAbi from "../../constants/boonAbi.json"
 
 
+
+
+const Input = ({ placeholder, type, handleChange}) => (
+  <input
+    placeholder={placeholder}
+    type={type}
+    step="0.0001"
+    // value={value}
+    onChange={(e) => handleChange(e)}
+    className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-sm white-glassmorphism"
+  />
+);
+
  
 const Possibility = () => {
   const {account} = useContext(ConnectContext);
@@ -20,88 +33,104 @@ const Possibility = () => {
     const [loading, setLoading] = useState(false)
     const [network, setNetwork] = useState('')
     const [owners, setOwners] = useState([])
+     
+  const [customerAddresses, setcustomerAddresses] = useState([]);
+  
+  const [reward, setreward] = useState([]);
+  
+   const [isFileUpload, setisFileUpload] = useState(false);
+  
+  
    const [tokenDetails, setTokenDetails] = React.useState({
     tokenAddress: "",
     amount: "", 
     NftAddress:""
 })
- // function to convert csv file from input file to arr, it receives a str paramater
- const csvToArray = (str) => {
-  // split arrays the file according to \n newline regex
- // const firstArr = str.split("\n");
- const firstArr = str.split("\r\n");
-  // mapping over the array to create a second arr
-  let secondArr = firstArr.map((item) => {
-    return item.split(',');
-  });
-  // secondArr=[[address, reward],[address, reward] etc]
-  // console.log(secondArr)
 
-  // mapping over the secondArr to get a distinct arr of address
-  const address = secondArr.map((item) => item[0] // [addresses]
-  );
-  // mapping over the secondArr to get a distinct arr of rewards and returning it
-  const values = secondArr.map((item) => {
+console.log(customerAddresses)
+console.log(reward)
+console.log(isFileUpload)
+  // function to convert csv file from input file to arr, it receives a str paramater
+  const csvToArray = (str) => {
+    // split arrays the file according to \n newline regex
+   // const firstArr = str.split("\n");
+   const firstArr = str.split("\r\n");
+   
+    // mapping over the array to create a second arr
+    let secondArr = firstArr.map((item) => {
+      return item.split(',');
+    });
+    // secondArr=[[address, reward],[address, reward] etc]
+    // console.log(secondArr)
 
-    return item[1]; // [rewards]
-  });
-  //   console.log(JSON.stringify(values))
-  //     console.log(JSON.stringify(address))
-  // updating secondArr before returning
-  secondArr = [address, values];  // secondArr=[[addresses],[rewards]]
-  return secondArr;
-};
-// const ctt = document.getElementById("csvFile");
-// ctt.onChange = function () {
-//   console.log("hi");
-// };
-// function to handle uploading file and getting initial readings
-function handleChange(e) {
-  e.preventDefault();
-  // input file tag is is cvsFile
-  console.log("ok");
- // const csvFile = document.getElementById("csvFile");
- const input = e.target.files[0];
-  // reading the file
-  const reader = new FileReader();
+    // mapping over the secondArr to get a distinct arr of address
+    const address = secondArr.map((item) => item[0] // [addresses]
+    ).filter(entry => /\S/.test(entry));
+    // mapping over the secondArr to get a distinct arr of rewards and returning it
+    const values = secondArr.map((item) => {
 
-  reader.onload = function(e) {
-    const text = e.target.result;
+      return item[1]; // [rewards]
+    }).filter(entry => /\S/.test(entry));
+    //   console.log(JSON.stringify(values))
+    //     console.log(JSON.stringify(address))
+    // updating secondArr before returning
+    secondArr = [address, values];  // secondArr=[[addresses],[rewards]]
+    return secondArr;
+  };
+  // const ctt = document.getElementById("csvFile");
+  // ctt.onChange = function () {
+  //   console.log("hi");
+  // };
+  // function to handle uploading file and getting initial readings
+  function handlecsv(e) {
+    e.preventDefault();
+    // input file tag is is cvsFile
+    console.log("ok");
+   // const csvFile = document.getElementById("csvFile");
+   const input = e.target.files[0];
+    // reading the file
+    const reader = new FileReader();
 
-    // calling our csvToArray(str) to convert to array
-    // data here is like our secondArray earlier
-    const data = csvToArray(text);
+    reader.onload = function(e) {
+      const text = e.target.result;
 
-    // setisFileUpload to true as we've uploaded our file
-    setisFileUpload(true);
+      // calling our csvToArray(str) to convert to array
+      // data here is like our secondArray earlier
+      const data = csvToArray(text);
 
-    // update our customerAddresses array
-    setcustomerAddresses(data[0]);
+      // setisFileUpload to true as we've uploaded our file
+      setisFileUpload(true);
 
-    // update our rewards array
-    setreward(data[1]);
+      // update our customerAddresses array
+      setcustomerAddresses(data[0]);
+
+      // update our rewards array
+      setreward(data[1]);
+
+    };
+
+    reader.readAsText(input);
 
   };
 
-  reader.readAsText(input);
 
-};
-const UploadSubmit = async (e) => {
+
+
+const upload = async() => {
   try{
-  if (customerAddresses.length <= 200){
-e.preventDefault();
-await airdropTokens(customerAddresses, reward)
-  setisFileUpload(false)
-alert("succesfully sent reward")}
-else { alert("only 200 addresses per batch")}
-test()
-  }
-  catch(error){
-    console.log(error)
-   success()
-  }
+    
+    const provider = new ethers.providers.Web3Provider(ethereum);
+  const signer = provider.getSigner();
+  const airdropContract = new ethers.Contract(BoonAddress, boonAbi.abi, signer);
 
-};
+  const giveaway= await airdropContract.airdrop(tokenDetails.tokenAddress, customerAddresses, reward)
+
+  await giveaway.wait()
+
+  success()
+  }catch(error){notify()}
+}
+
 
 
 useEffect( ()=>{
@@ -125,13 +154,14 @@ useEffect(()=>{},[approved])
 const notify = () => toast.error("Invalid entries, Please check address or balance");
 const success = () => toast.success("your have successfully approved tokens")
 const invalid =() => toast.error("only NFTs on the Ethereum network is allowed")
+const sucess = () => toast.success("your have successfully airdropped tokens")
 const { ethereum } = window;
 let array = []
 const calc = () =>{
   const fraction = tokenDetails.amount / owners.length
-  console.log(fraction)
+
   for(let i=0; i < owners.length; i++){
-    array.push(fraction)
+    array.push(ethers.utils.parseEther(`${fraction}`))
    }
    setAirdropAmount(array)
 }
@@ -139,17 +169,17 @@ const airdrop = async() =>{
   try{
     calc()
     clean()
-    console.log(nftList)
-    console.log(airdropAmount)
+       
+   
         const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const airdropContract = new ethers.Contract(BoonAddress, boonAbi.abi, signer);
 
     setLoading(true)
-    const boon = await airdropContract.airdrop(tokenDetails.tokenAddress, nftList,airdropAmount)
+    const boon = await airdropContract.airdrop(tokenDetails.tokenAddress, nftList, airdropAmount)
     await boon.wait()
     setLoading(false)
-    success()
+    sucess()
     setLast(false)
   }catch(error){
     console.log(error)
@@ -194,6 +224,7 @@ const clean = () =>{
   
 
 const handleSubmit = async(e) => {
+  setLoading(true)
   await fetch('https://api.cybertino.io/connect/',{
     method:"POST",
     headers: {"Content-Type": "application/json"},
@@ -210,9 +241,9 @@ const handleSubmit = async(e) => {
        
   })
   setLast(true)
-
+  setLoading(false)
 }
-console.log(owners)
+
 
 const handleOnChange = (e) => {
   setNetwork(e.target.value);
@@ -231,7 +262,7 @@ const handleOnChange = (e) => {
   <div className="gpt3__possibility section__padding" id="possibility">
     <div className="gpt3__possibility-image">
       <div className='input'>
-      {approved ? `You have approved ${tokenDetails.amount} tokens` : <div className="form">
+      {approved ? "" : <div className="form">
       <label className="gradient__text">TOKEN ADDRESS</label>
                 <input 
                     type="text"
@@ -260,7 +291,7 @@ const handleOnChange = (e) => {
           <option value="selectDreamCar">Select token Network</option>
           <option value="ERC20">ETHEREUM</option>
           <option value="BEP20">BINANCE SMARTCHAIN</option>
-          <option value="GOERLI">GOERLI</option>
+          <option value="GOERLI">MUMBAI</option>
         </select>
       
                 <button 
@@ -290,7 +321,7 @@ const handleOnChange = (e) => {
                     onChange={handleChange}
                 />
     <button className="form--button" onClick={handleSubmit} >
-  Get Holders
+ { loading ? "Getting NFT holders......." : "Get Holders"} 
 </button>
     </div> : ""}
     
@@ -302,9 +333,14 @@ const handleOnChange = (e) => {
       <button className="form--button" onClick={airdrop} >
       {loading ? "Sharing..........." : "Share To All"}
     </button>
-    <button className="form--button" onClick={UploadSubmit} >
+    <div>
+    <div>
+    <Input type="file" id="csvFile" accept=".csv" className="form--input" handleChange={handlecsv} />
+    </div>
+    <button className="form--button" onClick={upload} >
     Upload Custom List
     </button>
+    </div>
       </div>
     </div> : <div className="gpt3__possibility-content">
       <h1 className="gradient__text">Approve the airdrop <br /> amount to get started</h1>
