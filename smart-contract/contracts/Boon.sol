@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+
 import "./Token.sol";
+
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+
 
 contract Boon is Ownable, Pausable {
     constructor() {}
@@ -15,7 +18,7 @@ contract Boon is Ownable, Pausable {
         address _token,
         address[] calldata _address,
         uint256[] calldata _rewards
-    ) external {
+    ) external whenNotPaused{
         token = IERC20(_token);
         require(token.balanceOf(msg.sender) > 0, "get more tokens");
         require(
