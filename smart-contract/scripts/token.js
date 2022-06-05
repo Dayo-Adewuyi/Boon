@@ -13,13 +13,6 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  // We get the contract to deploy
-  const Token = await hre.ethers.getContractFactory("Token");
-  const token = await Token.deploy;
-
-  
-
-  console.log("Token deployed to:", token.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

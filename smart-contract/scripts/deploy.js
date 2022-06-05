@@ -6,6 +6,22 @@ async function main(){
   A ContractFactory in ethers.js is an abstraction used to deploy new smart contracts,
   so NestcoinContract here is a factory for instances of our Nestcoin contract.
   */
+ 
+  console.log("deploying NFT contract.......")
+  const NFTContract = await ethers.getContractFactory("NFT");
+
+  // here we deploy the contract
+  const deployedNFTContract = await NFTContract.deploy();
+
+  // Wait for it to finish deploying
+await deployedNFTContract.deployed();
+
+// print the address of the deployed contract
+console.log(
+  "\n 🏵 NFT Contract Address is:",
+  deployedNFTContract.address
+);
+
  console.log("deploying Token contract.......")
     const TokenContract = await ethers.getContractFactory("Token");
 

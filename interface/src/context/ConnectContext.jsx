@@ -11,32 +11,13 @@ export const ConnectContext = React.createContext();
 const { ethereum } = window;
 
 
-const approve = async()=>{
-  try{
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    const signer = provider.getSigner();
-    const tokenContract = new ethers.Contract(tokenAbi.abi, signer);
 
-    console.log("about to approve tokens........")
-    const amount = ethers.utils.parseEther("100");
-    const getUserToken = await tokenContract.approve(BoonAddress,amount )
-    console.log("approving token............")
-    await getUserToken.wait()
-    console.log("yay, we are done")
-  
-    
-    }catch(error){
-    console.log(error)
-  }
-
-}
 
 export const ConnectProvider = ({ children }) =>{
     const [web3Modal, setWeb3Modal] = useState(null)
    const [connectedWallet, setConnectedWallet] = useState(false);
    const [account, setAccount] = useState("")
-    console.log(connectedWallet)
-   console.log(account)
+   
   
    useEffect(() => {
     const providerOptions = {
@@ -111,9 +92,7 @@ export const ConnectProvider = ({ children }) =>{
         value={{
           connectWallet,
           connectedWallet,
-          account,
-          approve
-                   
+          account          
         }}
       >
         {children}
