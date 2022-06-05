@@ -36,7 +36,7 @@ const Possibility = () => {
     const [network, setNetwork] = useState('')
     const [owners, setOwners] = useState([])
     const [balance, setBalance] = useState(0)
-     
+    
   const [customerAddresses, setcustomerAddresses] = useState([]);
   
   const [reward, setreward] = useState([]);
@@ -62,13 +62,14 @@ const airdropNft = async() => {
   const airdropContract = new ethers.Contract(BoonAddress, boonAbi.abi, signer);
 
   const giveaway= await airdropContract.nftdrop(tokenDetails.tokenAddress, customerAddresses, reward)
-
+ 
   await giveaway.wait()
 
   success()
   
 }catch(error) {
   invalid()
+  console.log(error)
 }
 
 }
